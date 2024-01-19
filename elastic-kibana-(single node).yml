@@ -2,18 +2,23 @@ version: "3"
 services:
   elasticsearch:
     container_name: es01
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
       [
-        "ES_JAVA_OPTS=-Xms2g -Xmx2g",
+        # Adjust you memory configuration here
+        "ES_JAVA_OPTS=-Xms500m -Xmx500m",
         "bootstrap.memory_lock=true",
         "discovery.type=single-node",
         "xpack.security.enabled=false",
         "xpack.security.enrollment.enabled=false",
       ]
-
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500M
     ports:
-      - 9200:9200
+      - 8082:9200
     networks:
       - elastic
     ulimits:
@@ -24,15 +29,21 @@ services:
         soft: 65536
         hard: 65536
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.12
+    image: docker.elastic.co/kibana/kibana:8.12.0
     container_name: kib01
     environment:
       XPACK_APM_SERVICEMAPENABLED: "true"
+      # Change the ecryption key
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
       LOGGING_ROOT_LEVEL: error
     ports:
-      - 5601:5601
+      - 8081:5601
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500M
 networks:
   elastic:
