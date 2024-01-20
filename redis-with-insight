@@ -1,0 +1,20 @@
+services:
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      # For Redis
+      - 8082:6379
+      # For RedisInsight
+      - 8081:8001
+    volumes:
+      - redis-data:/data:rw
+      - redisinsight-data:/db:rw
+      - ./redis.conf:/etc/redis/redis.conf
+    environment:
+      # Change the password here if you are exposing redis! (default user is "default")
+      REDIS_ARGS: "--requirepass YourPasswordHere"
+volumes:
+  redis-data:
+    driver: local
+  redisinsight-data:
+    driver: local
