@@ -1,11 +1,11 @@
+# Mind that this file needs at least the M size with 4 GB of RAM
 version: "3"
 services:
   elasticsearch:
-    container_name: es01
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
       # Adjust you memory configuration here. At most 50% of the container memory
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "bootstrap.memory_lock=true"
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
@@ -13,8 +13,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1g
+          cpus: "1.5"
+          memory: 2g
     ports:
       - 8082:9200
     networks:
@@ -26,9 +26,13 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data:rw
+    restart: unless-stopped
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
-    container_name: kib01
+    depends_on:
+      - elasticsearch
     environment:
       XPACK_APM_SERVICEMAPENABLED: "true"
       # Change the ecryption key
@@ -41,7 +45,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 1g
+    restart: unless-stopped
 networks:
   elastic:
+volumes:
+  esdata1:
+    driver: local
