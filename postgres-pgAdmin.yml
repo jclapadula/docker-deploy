@@ -1,0 +1,39 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      # Change credentials
+      - POSTGRES_USER=YourUser
+      - POSTGRES_PASSWORD=YourPassword
+      - POSTGRES_DB=postgres #optional
+    ports:
+      - "8081:5432"
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 500m
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      # Change credentials
+      - PGADMIN_DEFAULT_EMAIL=youremail@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=YourPGAdminPassword
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 500m
+
+volumes:
+  pgdata:
+    driver: local
