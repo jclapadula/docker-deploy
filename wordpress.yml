@@ -22,6 +22,8 @@ services:
     image: wordpress:latest
     ports:
       - 80:80
+    volumes:
+      - wordpress-files:/var/www/html
     restart: unless-stopped
     environment:
       - WORDPRESS_DB_HOST=db
@@ -35,3 +37,4 @@ services:
           memory: 500M
 volumes:
   db_data:
+  wordpress-files:
