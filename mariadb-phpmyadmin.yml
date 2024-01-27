@@ -1,0 +1,37 @@
+services:
+  db:
+    image: mariadb
+    environment:
+      # Change all this to make it secure
+      MYSQL_ROOT_PASSWORD: rootPassword
+      MYSQL_DATABASE: db
+      MYSQL_USER: YourUser
+      MYSQL_PASSWORD: YourPassword
+    restart: unless-stopped
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      # Mind that the external port is 8081
+      - 8081:3306
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 500m
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: unless-stopped
+    ports:
+      # Here the external port is 8082 but migh as well be 80 (will add https automatically)
+      - 8082:80
+    environment:
+      - PMA_ARBITRARY=1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 500m
+
+volumes:
+  data:
