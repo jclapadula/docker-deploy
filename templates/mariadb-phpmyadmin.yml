@@ -10,9 +10,9 @@ services:
     restart: unless-stopped
     volumes:
       - data:/var/lib/mysql
-    ports:
-      # Mind that the external port is 8081
-      - 8081:3306
+    expose:
+      # Only accesible inside the deployment (host name is db)
+      - 3306
     deploy:
       resources:
         limits:
@@ -23,8 +23,7 @@ services:
     image: phpmyadmin
     restart: unless-stopped
     ports:
-      # Here the external port is 8082 but migh as well be 80 (will add https automatically)
-      - 8082:80
+      - 80:80
     environment:
       - PMA_ARBITRARY=1
     deploy:
