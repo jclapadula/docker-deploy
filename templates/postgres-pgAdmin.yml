@@ -7,8 +7,9 @@ services:
       - POSTGRES_USER=YourUser
       - POSTGRES_PASSWORD=YourPassword
       - POSTGRES_DB=postgres #optional
-    ports:
-      - "8081:5432"
+    expose:
+      # Only accesible in the deployment (hostname is postgres)
+      - 5432
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
