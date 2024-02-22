@@ -23,7 +23,7 @@ services:
     ports:
       - 80:80
     volumes:
-      - wordpress-files:/var/www/html
+      - wordpress-files:/var/www/html:rw
     restart: unless-stopped
     environment:
       - WORDPRESS_DB_HOST=db
