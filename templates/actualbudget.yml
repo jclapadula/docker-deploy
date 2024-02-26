@@ -1,0 +1,17 @@
+services:
+  app:
+    image: actualbudget/actual-server
+    pull_policy: always
+    ports:
+      # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
+      - "80:5006"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1g
+    volumes:
+      - data:/data:rw
+    restart: unless-stopped
+volumes:
+  data:
