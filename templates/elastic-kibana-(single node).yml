@@ -1,5 +1,4 @@
 # Mind that this file needs at least the M size with 4 GB of RAM
-version: "3"
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0

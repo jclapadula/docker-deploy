@@ -4,7 +4,7 @@ services:
     # Replace yourapp with the name of your image
     image: registry.dockerdeploy.cloud/yourNamespace/yourapp
     ports:
-    # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
+      # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
       - "80:80"
     deploy:
       resources:
