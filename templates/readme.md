@@ -1,6 +1,6 @@
 # Templates
 
-In this folder you can find ready to copy-paste templates of open source projects together with their dependencies.
+In this folder you find ready to copy-paste templates of open source projects together with their dependencies.
 
 ## Change passwords
 
