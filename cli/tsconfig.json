@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "ES2022",
+    "module": "Node16",
+    "strict": false,
+    "esModuleInterop": true,
+    "moduleResolution": "Node16",
+
+    "skipLibCheck": true
+  }
+}
