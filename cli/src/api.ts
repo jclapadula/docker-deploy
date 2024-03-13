@@ -18,3 +18,5 @@ export const getDeployments = async () => {
     console.log("Something went wrong");
   }
 };
+
+export const getRegistryCredentials = () => {};

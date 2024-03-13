@@ -1,14 +1,18 @@
 {
-  "name": "dd-cli",
-  "version": "1.0.0",
+  "name": "dockerdeploy-cli",
+  "version": "0.1.1",
   "description": "Docker Deploy CLI",
+  "repository": "github:jclapadula/docker-deploy",
   "scripts": {
-    "start": "tsc && node ./dist/index.js"
+    "start": "tsc && node ./dist/index.js",
+    "build": "tsc",
+    "prepublish": "tsc"
   },
   "type": "module",
-  "author": "juan lapadula",
+  "author": "Juan Lapadula",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@types/inquirer": "^9.0.7",
     "@types/node": "^20.11.26",
     "@types/yargs": "^17.0.32",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
@@ -22,6 +26,7 @@
   "dependencies": {
     "axios": "^1.6.7",
     "conf": "^12.0.0",
+    "inquirer": "^9.2.15",
     "open": "^10.1.0",
     "yargs": "^17.7.2"
   },
