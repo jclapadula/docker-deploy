@@ -6,7 +6,7 @@ const config = new Conf<{
   refreshToken?: string;
   expireDate?: string;
   accessToken?: string;
-}>({ projectName: "dd-cli" });
+}>({ projectName: "dd-cli", configName: "auth" });
 
 export const getAccessToken = async () => {
   if (!config.get("accessToken")) {
@@ -18,8 +18,15 @@ export const getAccessToken = async () => {
     await login();
   }
 
-  // Implement refresh tokens
-  // https://auth0.com/docs/get-started/authentication-and-authorization-flow/device-authorization-flow/call-your-api-using-the-device-authorization-flow#refresh-tokens
+  const now = new Date();
+  const expiration = new Date(expireDate);
+  if (now > expiration) {
+    if (config.get("refreshToken")) {
+      refreshTokens();
+    } else {
+      await login();
+    }
+  }
 
   return config.get("accessToken");
 };
@@ -78,6 +85,35 @@ export const login = async () => {
   config.set("expireDate", expiration.toISOString());
 
   console.log("You are now logged in");
+};
+
+const refreshTokens = async () => {
+  const refreshToken = config.get("refreshToken");
+  if (!refreshToken) {
+    throw new Error("Please login");
+  }
+
+  const tokensResponse = await axios.request<{
+    access_token: string;
+    expires_in: number;
+  }>({
+    method: "POST",
+    url: "https://dockerdeploy.eu.auth0.com/oauth/token",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    data: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: "2wQiAna0UFAjmxnkxjqD0B4YZpnnoh9v",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  config.set("accessToken", tokensResponse.data.access_token);
+
+  const expiration = new Date();
+  expiration.setSeconds(
+    expiration.getSeconds() + tokensResponse.data.expires_in
+  );
+  config.set("expireDate", expiration.toISOString());
 };
 
 export const logout = async () => {
