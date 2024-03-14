@@ -1,2 +1,1 @@
-FROM scratch
-CMD ["echo This is a dummy dockerfile"]
+FROM httpd:2.4

@@ -55,3 +55,23 @@ export const createDeployment = async (
     console.log("Something went wrong");
   }
 };
+
+export const deployDeployment = async (deploymentId: string) => {
+  const jwt = await getAccessToken();
+
+  try {
+    const response = await axios.put<{ consoleResult: string }>(
+      `https://api.dockerdeploy.cloud/api/deployments/${deploymentId}/deploy`,
+      undefined,
+      {
+        headers: {
+          Authorization: "Bearer " + jwt,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log("Something went wrong");
+  }
+};

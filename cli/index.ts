@@ -2,7 +2,7 @@
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import { login, logout } from "./src/auth.js";
-import { deployCurrent } from "./src/deployments.js";
+import { buildAndPublish, deploy } from "./src/deployments.js";
 
 const argv = yargs(hideBin(process.argv));
 
@@ -15,16 +15,22 @@ argv
   )
   .command("logout", "Log out from Docker Deploy", logout)
   .command<{ f: string }>(
-    "deploy",
-    "Deploys the current project into Docker Deploy",
+    "publish",
+    "Builds and publish the docker image defined by the selected Dockerfile",
     (args) =>
       args.option("f", {
         type: "string",
         default: "./Dockerfile",
         description: "Dockerfile to deploy",
       }),
-    (args) => deployCurrent({ dockerfile: args.f })
+    (args) => buildAndPublish({ dockerfile: args.f })
   )
+  .command<{ f: string }>(
+    "deploy",
+    "Deploys the current app into Docker Deploy. It requires the publish command to be executed first.",
+    () => deploy()
+  )
+  .scriptName("dd-cli")
   .command({
     command: "*",
     handler() {

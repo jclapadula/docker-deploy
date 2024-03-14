@@ -7,6 +7,7 @@ import {
   CreateDeploymentModel,
   RegistryCredentails,
   createDeployment,
+  deployDeployment,
   getRegistryCredentials,
 } from "./api.js";
 import { getDeploymentConfig, updateDeploymentConfig } from "./config.js";
@@ -16,11 +17,12 @@ type DeployArgs = {
   dockerfile: string;
 };
 
-export const deployCurrent = async ({ dockerfile }: DeployArgs) => {
+export const buildAndPublish = async ({ dockerfile }: DeployArgs) => {
   if (!fs.existsSync(dockerfile)) {
     console.error(
       "Dockerfile doesn't exist! Please run the command where your dockerfile is located"
     );
+
     return;
   }
 
@@ -28,15 +30,26 @@ export const deployCurrent = async ({ dockerfile }: DeployArgs) => {
 
   await installEmulatorIfNecessary();
 
+  await setAppNameIfNecessary();
+
   const registryCredentials = await getRegistryCredentials();
 
   await loginIntoDockerRegistry(registryCredentials);
 
-  await setAppNameIfNecessary();
-
   await buildAndPublishImage(dockerfile, registryCredentials);
+};
 
-  const imageTag = getImageTag(registryCredentials);
+export const deploy = async () => {
+  const { imageTag, imageName } = getDeploymentConfig();
+  if (!imageTag) {
+    console.error(
+      `Not image tag found for ${
+        imageName || "the app"
+      }. Please run dd-cli publish to re-publish the image`
+    );
+    return;
+  }
+
   const createDeploymentModel: CreateDeploymentModel = {
     name: "My Deployment",
     domain: "",
@@ -47,6 +60,10 @@ export const deployCurrent = async ({ dockerfile }: DeployArgs) => {
 
   console.log("");
   console.log("Deployment created successfully ✔");
+
+  await deployDeployment(deployment.id);
+  console.log("");
+  console.log("Deployment started");
   console.log(
     "Edit your deployment here: " +
       `https://dockerdeploy.cloud/dashboard/deployments/${deployment.id}`
@@ -95,11 +112,6 @@ const getRegistry = (username: string) =>
 const getImagetag = (username: string, appName: string) =>
   `registry.dockerdeploy.cloud/${username}/${appName}`;
 
-const getImageTag = ({ username }: RegistryCredentails) => {
-  const appName = getDeploymentConfig().imageName || "my-first-app";
-  return getImagetag(username, appName);
-};
-
 const buildAndPublishImage = async (
   dockerfile: string,
   registryCredentials: RegistryCredentails
@@ -142,6 +154,8 @@ const buildAndPublishImage = async (
   } catch (error) {
     throw new Error("An error ocurred when pushing your image");
   }
+
+  updateDeploymentConfig({ imageTag });
 };
 
 const checkIfDockerIsRunning = async () => {

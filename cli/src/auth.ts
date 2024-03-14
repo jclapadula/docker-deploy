@@ -8,14 +8,20 @@ const config = new Conf<{
   accessToken?: string;
 }>({ projectName: "dd-cli", configName: "auth" });
 
+const requestLoginAndThrow = () => {
+  throw new Error(
+    "You need to be logged in to perform this operation.Please run dd-cli login to login."
+  );
+};
+
 export const getAccessToken = async () => {
   if (!config.get("accessToken")) {
-    await login();
+    requestLoginAndThrow();
   }
 
   const expireDate = config.get("expireDate");
   if (!expireDate) {
-    await login();
+    requestLoginAndThrow();
   }
 
   const now = new Date();
@@ -24,7 +30,7 @@ export const getAccessToken = async () => {
     if (config.get("refreshToken")) {
       refreshTokens();
     } else {
-      await login();
+      requestLoginAndThrow();
     }
   }
 
