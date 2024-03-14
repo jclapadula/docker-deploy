@@ -3,8 +3,14 @@ import inquirer from "inquirer";
 import child_process, { ExecException } from "child_process";
 import util from "util";
 const exec = util.promisify(child_process.exec);
-import { RegistryCredentails, getRegistryCredentials } from "./api.js";
+import {
+  CreateDeploymentModel,
+  RegistryCredentails,
+  createDeployment,
+  getRegistryCredentials,
+} from "./api.js";
 import { getDeploymentConfig, updateDeploymentConfig } from "./config.js";
+import { DeploymentSize } from "./api.types.js";
 
 type DeployArgs = {
   dockerfile: string;
@@ -30,7 +36,36 @@ export const deployCurrent = async ({ dockerfile }: DeployArgs) => {
 
   await buildAndPublishImage(dockerfile, registryCredentials);
 
-  // Create deployment => show link
+  const imageTag = getImageTag(registryCredentials);
+  const createDeploymentModel: CreateDeploymentModel = {
+    name: "My Deployment",
+    domain: "",
+    size: DeploymentSize.XS,
+    dockerfile: getComposeForSingleService({ imageTag }),
+  };
+  const deployment = await createDeployment(createDeploymentModel);
+
+  console.log("");
+  console.log("Deployment created successfully ✔");
+  console.log(
+    "Edit your deployment here: " +
+      `https://dockerdeploy.cloud/dashboard/deployments/${deployment.id}`
+  );
+  console.log(`See your deployment running: ${deployment.domain}`);
+};
+
+const getComposeForSingleService = ({ imageTag }: { imageTag: string }) => {
+  return `services:
+  app:
+    image: ${imageTag}
+    ports:
+      # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
+      - "80:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1g`;
 };
 
 const imageTagRegex = /^([a-z0-9]+(?:[._-]{1,2}[a-z0-9]+)*)$/;
@@ -59,6 +94,11 @@ const getRegistry = (username: string) =>
 
 const getImagetag = (username: string, appName: string) =>
   `registry.dockerdeploy.cloud/${username}/${appName}`;
+
+const getImageTag = ({ username }: RegistryCredentails) => {
+  const appName = getDeploymentConfig().imageName || "my-first-app";
+  return getImagetag(username, appName);
+};
 
 const buildAndPublishImage = async (
   dockerfile: string,
