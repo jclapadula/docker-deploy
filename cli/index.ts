@@ -2,7 +2,6 @@
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import { login, logout } from "./src/auth.js";
-import { getDeployments } from "./src/api.js";
 import { deployCurrent } from "./src/deployments.js";
 
 const argv = yargs(hideBin(process.argv));
@@ -15,10 +14,9 @@ argv
     login
   )
   .command("logout", "Log out from Docker Deploy", logout)
-  .command("deployments get", "See all your deployments", getDeployments)
   .command(
     "deploy",
-    "Deploys the current project into dockerdeploy.cloud",
+    "Deploys the current project into Docker Deploy",
     deployCurrent
   )
   .command({
