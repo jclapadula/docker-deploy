@@ -6,8 +6,12 @@ const exec = util.promisify(child_process.exec);
 import { RegistryCredentails, getRegistryCredentials } from "./api.js";
 import { getDeploymentConfig, updateDeploymentConfig } from "./config.js";
 
-export const deployCurrent = async () => {
-  if (!fs.existsSync("Dockerfile")) {
+type DeployArgs = {
+  dockerfile: string;
+};
+
+export const deployCurrent = async ({ dockerfile }: DeployArgs) => {
+  if (!fs.existsSync(dockerfile)) {
     console.error(
       "Dockerfile doesn't exist! Please run the command where your dockerfile is located"
     );
@@ -24,7 +28,7 @@ export const deployCurrent = async () => {
 
   await setAppNameIfNecessary();
 
-  await buildAndPublishImage(registryCredentials);
+  await buildAndPublishImage(dockerfile, registryCredentials);
 
   // Create deployment => show link
 };
@@ -57,11 +61,13 @@ const getImagetag = (username: string, appName: string) =>
   `registry.dockerdeploy.cloud/${username}/${appName}`;
 
 const buildAndPublishImage = async (
+  dockerfile: string,
   registryCredentials: RegistryCredentails
 ) => {
   // Build & publish the image with the right tags
-  const imageTag = getImagetag(registryCredentials.username, "myfirstapp");
-  const buildCommand = `docker build ${
+  const appName = getDeploymentConfig().imageName || "my-first-app";
+  const imageTag = getImagetag(registryCredentials.username, appName);
+  const buildCommand = `docker build -f ${dockerfile} ${
     !isArmPc() ? "--platform linux/arm64" : ""
   } . --tag ${imageTag}`;
 

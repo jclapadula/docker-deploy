@@ -7,17 +7,23 @@ import { deployCurrent } from "./src/deployments.js";
 const argv = yargs(hideBin(process.argv));
 
 argv
-  .usage("Usage: $0 <command> [options]")
+  .usage("Usage: dd-cli <command> [options]")
   .command(
     "login",
     "Log in into Docker Deploy so you can perform operations in your account",
     login
   )
   .command("logout", "Log out from Docker Deploy", logout)
-  .command(
+  .command<{ f: string }>(
     "deploy",
     "Deploys the current project into Docker Deploy",
-    deployCurrent
+    (args) =>
+      args.option("f", {
+        type: "string",
+        default: "./Dockerfile",
+        description: "Dockerfile to deploy",
+      }),
+    (args) => deployCurrent({ dockerfile: args.f })
   )
   .command({
     command: "*",
