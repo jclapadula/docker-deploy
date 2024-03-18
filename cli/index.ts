@@ -15,8 +15,8 @@ argv
   )
   .command("logout", "Log out from Docker Deploy", logout)
   .command<{ f: string }>(
-    "publish",
-    "Builds and publish the docker image defined by the selected Dockerfile",
+    "build",
+    "Builds and publish the docker image defined by the selected Dockerfile.",
     (args) =>
       args.option("f", {
         type: "string",
