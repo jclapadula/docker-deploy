@@ -78,6 +78,7 @@ const getComposeForSingleService = ({ imageTag }: { imageTag: string }) => {
     ports:
       # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
       - "80:80"
+    pull_policy: always
     deploy:
       resources:
         limits:
