@@ -14,9 +14,13 @@ services:
     # You need to map the volume where the data is located to read it
       - data:/data
     ports:
-    # - 80:3000
     # The sqlite will be available on port 8081 with https
-      - 8081:3001
+      - 80:3000
+    # - 80:3001
+    environment:
+    # This will be the credentials for basic auth
+      - CUSTOM_USER=yourUsername
+      - PASSWORD=yourPassword
     restart: unless-stopped
     deploy:
       resources:
