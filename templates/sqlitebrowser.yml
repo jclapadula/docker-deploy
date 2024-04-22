@@ -1,0 +1,28 @@
+# Add this service to your app to explore your sqlite files from the browser.
+# You likely will have this activated only temporarly
+
+services:
+  sqlitebrowser:
+    image: lscr.io/linuxserver/sqlitebrowser:latest
+    container_name: sqlitebrowser
+    pull_policy: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+    # You need to map the volume where the data is located to read it
+      - data:/data
+    ports:
+    # - 80:3000
+    # The sqlite will be available on port 8081 with https
+      - 8081:3001
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1g
+volumes:
+# The volume you want to read
+  data:
