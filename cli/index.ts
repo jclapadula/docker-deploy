@@ -14,16 +14,23 @@ argv
     login
   )
   .command("logout", "Log out from Docker Deploy", logout)
-  .command<{ f: string }>(
+  .command<{ f: string; v: string[] }>(
     "build",
     "Builds and publish the docker image defined by the selected Dockerfile.",
     (args) =>
-      args.option("f", {
-        type: "string",
-        default: "./Dockerfile",
-        description: "Dockerfile to deploy",
-      }),
-    (args) => buildAndPublish({ dockerfile: args.f })
+      args
+        .option("f", {
+          type: "string",
+          default: "./Dockerfile",
+          description: "Dockerfile to deploy",
+        })
+        .option("v", {
+          type: "array",
+          default: ["latest"],
+          description:
+            "Set the version for this image tag. By default 'latest' is set",
+        }),
+    (args) => buildAndPublish({ dockerfile: args.f, versions: args.v })
   )
   .command<{ f: string }>(
     "deploy",
@@ -31,6 +38,7 @@ argv
     () => deploy()
   )
   .scriptName("dd-cli")
+  .showHelpOnFail(false)
   .command({
     command: "*",
     handler() {

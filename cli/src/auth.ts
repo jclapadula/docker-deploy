@@ -28,7 +28,7 @@ export const getAccessToken = async () => {
   const expiration = new Date(expireDate);
   if (now > expiration) {
     if (config.get("refreshToken")) {
-      refreshTokens();
+      await refreshTokens();
     } else {
       requestLoginAndThrow();
     }
@@ -52,6 +52,8 @@ export const login = async () => {
       audience: "https://api.dockerdeploy.cloud",
     },
   });
+
+  console.log("Your device code is " + response.data.device_code);
 
   await open(response.data.verification_uri_complete, { wait: false });
 
@@ -122,6 +124,7 @@ const refreshTokens = async () => {
   config.set("expireDate", expiration.toISOString());
 };
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export const logout = async () => {
   config.delete("accessToken");
   config.delete("expireDate");

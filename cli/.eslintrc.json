@@ -3,7 +3,10 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended-type-checked"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
@@ -11,5 +14,11 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {},
-  "ignorePatterns": ["/dist/**/*.js"]
+  "ignorePatterns": ["/dist/**/*.js"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": { "project": "./tsconfig.json" }
+    }
+  ]
 }

@@ -15,9 +15,10 @@ import { DeploymentSize } from "./api.types.js";
 
 type DeployArgs = {
   dockerfile: string;
+  versions: string[];
 };
 
-export const buildAndPublish = async ({ dockerfile }: DeployArgs) => {
+export const buildAndPublish = async ({ dockerfile, versions }: DeployArgs) => {
   if (!fs.existsSync(dockerfile)) {
     console.error(
       "Dockerfile doesn't exist! Please run the command where your dockerfile is located"
@@ -36,12 +37,12 @@ export const buildAndPublish = async ({ dockerfile }: DeployArgs) => {
 
   await loginIntoDockerRegistry(registryCredentials);
 
-  await buildAndPublishImage(dockerfile, registryCredentials);
+  await buildAndPublishImage(dockerfile, registryCredentials, versions);
 };
 
 export const deploy = async () => {
-  const { imageTag, imageName } = getDeploymentConfig();
-  if (!imageTag) {
+  const { tagBase, imageName } = getDeploymentConfig();
+  if (!tagBase) {
     console.error(
       `Not image tag found for ${
         imageName || "the app"
@@ -54,7 +55,7 @@ export const deploy = async () => {
     name: "My Deployment",
     domain: "",
     size: DeploymentSize.XS,
-    dockerfile: getComposeForSingleService({ imageTag }),
+    dockerfile: getComposeForSingleService({ imageTag: tagBase }),
   };
   const deployment = await createDeployment(createDeploymentModel);
 
@@ -97,14 +98,14 @@ const setAppNameIfNecessary = async () => {
     type: "input",
     message: "Please pick a name for your docker image",
     name: "imageName",
-    validate: (userInput) => {
+    validate: (userInput: string) => {
       if (userInput && imageTagRegex.test(userInput)) return true;
 
       return "The image name should be all lowercase and can contain only letters, numbers, - and _";
     },
   });
 
-  updateDeploymentConfig({ imageName: result.imageName });
+  updateDeploymentConfig({ imageName: result.imageName as string });
 };
 
 const getRegistry = (username: string) =>
@@ -115,14 +116,27 @@ const getImagetag = (username: string, appName: string) =>
 
 const buildAndPublishImage = async (
   dockerfile: string,
-  registryCredentials: RegistryCredentails
+  registryCredentials: RegistryCredentails,
+  versions: string[]
 ) => {
+  if (versions.length === 0) {
+    throw new Error(
+      "No version set for the image. Default is 'latest' if the -v is not used"
+    );
+  }
+
   // Build & publish the image with the right tags
   const appName = getDeploymentConfig().imageName || "my-first-app";
-  const imageTag = getImagetag(registryCredentials.username, appName);
+  const imageTagBase = getImagetag(registryCredentials.username, appName);
+
+  const tagsWithVersions = versions.map((v) => `${imageTagBase}:${v}`);
+  const firstFullTag = tagsWithVersions[0];
+
+  const tagsArg = tagsWithVersions.map((fullTag) => `-t ${fullTag} `).join("");
+
   const buildCommand = `docker build -f ${dockerfile} ${
     !isArmPc() ? "--platform linux/arm64" : ""
-  } . --tag ${imageTag}`;
+  } . ${tagsArg}`;
 
   console.log("Building your docker image...");
   try {
@@ -131,7 +145,7 @@ const buildAndPublishImage = async (
       stdout && console.log(stdout);
       console.log(stderr);
     } else {
-      console.log("You image tag is " + imageTag);
+      console.log("You image tag is " + firstFullTag);
     }
   } catch (error) {
     console.error((error as ExecException).stderr);
@@ -143,20 +157,20 @@ const buildAndPublishImage = async (
   console.log("Pushing the image to the registry");
 
   try {
-    const { stderr, stdout } = await exec(`docker push ${imageTag}`);
+    const { stderr, stdout } = await exec(`docker push ${firstFullTag}`);
 
     if (stderr) {
       stdout && console.log(stdout);
       console.log(stderr);
     } else {
       console.log("Image pushed ✔");
-      console.log("You image tag is " + imageTag);
+      console.log("You image tag is " + firstFullTag);
     }
   } catch (error) {
-    throw new Error("An error ocurred when pushing your image");
+    throw new Error(`An error ocurred when pushing your image\n${error}`);
   }
 
-  updateDeploymentConfig({ imageTag });
+  updateDeploymentConfig({ tagBase: imageTagBase });
 };
 
 const checkIfDockerIsRunning = async () => {
@@ -170,8 +184,6 @@ const checkIfDockerIsRunning = async () => {
 };
 
 const loginIntoDockerRegistry = async (credentials: RegistryCredentails) => {
-  fs.writeFileSync("./c", credentials.password);
-
   try {
     const registry = getRegistry(credentials.username);
     const isWindows = process.platform === "win32";
@@ -183,10 +195,7 @@ const loginIntoDockerRegistry = async (credentials: RegistryCredentails) => {
       console.log(stderr);
     }
   } catch (error) {
-    console.log({ error });
     throw new Error(`An error ocurred when login into docker`);
-  } finally {
-    fs.rmSync("./c");
   }
 };
 

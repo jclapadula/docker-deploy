@@ -2,7 +2,9 @@ import fs from "node:fs";
 
 export type DeploymentConfig = {
   imageName: string;
-  imageTag: string;
+
+  /** Base without version */
+  tagBase: string;
 };
 
 const configLocation = "./dockerdeploy.json";
