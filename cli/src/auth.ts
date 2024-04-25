@@ -41,6 +41,7 @@ export const login = async () => {
   const response = await axios.request<{
     verification_uri_complete: string;
     device_code: string;
+    user_code: string;
     interval: number;
   }>({
     method: "POST",
@@ -53,7 +54,7 @@ export const login = async () => {
     },
   });
 
-  console.log("Your device code is " + response.data.device_code);
+  console.log("Your device code is " + response.data.user_code);
 
   await open(response.data.verification_uri_complete, { wait: false });
 
