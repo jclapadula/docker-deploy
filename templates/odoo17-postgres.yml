@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo17@2023
+      - POSTGRES_DB=postgres
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2g
+
+  odoo17:
+    image: odoo:17
+    depends_on:
+      - db
+    ports:
+      - "8081:8069"
+      - "8082:8072" # live chat
+    tty: true
+    command: --
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo17@2023
+    volumes:
+      # - ./entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
+      - addons:/mnt/extra-addons
+      - etc:/etc/odoo
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 6g
+
+volumes:
+  pgdata:
+    driver: local
+  addons:
+    driver: local
+  etc:
+    driver: local
