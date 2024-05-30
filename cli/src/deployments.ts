@@ -210,11 +210,11 @@ const installEmulatorIfNecessary = async () => {
     type: "confirm",
     name: "install_qemu",
     message:
-      "Your CPU is not ARM, you need to install a QEMU emulator to build ARM images.\n Do you want to install it now?",
+      "Your CPU is not ARM, you need to configure a QEMU emulator to build ARM images.\n Do you want to configure it now?",
   });
 
   if (result.install_qemu) {
-    console.log("Installing emulator, it might take a bit");
+    console.log("Configuring emulator...");
     console.log("");
 
     try {
