@@ -13,12 +13,6 @@ services:
     expose:
       # Only accesible inside the deployment (host name is db)
       - 3306
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
-
   phpmyadmin:
     image: phpmyadmin
     restart: unless-stopped
@@ -26,11 +20,6 @@ services:
       - 80:80
     environment:
       - PMA_ARBITRARY=1
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
 
 volumes:
   data:
