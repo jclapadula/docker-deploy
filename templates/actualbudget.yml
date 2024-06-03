@@ -4,11 +4,6 @@ services:
     pull_policy: always
     ports:
       - "80:5006"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 1g
     volumes:
       - data:/data:rw
     restart: unless-stopped
