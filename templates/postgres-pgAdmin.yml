@@ -13,11 +13,6 @@ services:
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
 
   pgadmin:
     container_name: pgadmin
@@ -29,11 +24,6 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
 
 volumes:
   pgdata:
