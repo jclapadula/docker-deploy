@@ -10,7 +10,6 @@ services:
     expose:
       # Only accesible in the deployment (hostname is postgres)
       - 5432
-    restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -23,7 +22,6 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=YourPGAdminPassword
     ports:
       - "80:80"
-    restart: unless-stopped
 
 volumes:
   pgdata:
