@@ -13,11 +13,6 @@ services:
     expose:
       - 3306
       - 33060
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 500M
   wordpress:
     image: wordpress:latest
     ports:
@@ -30,11 +25,6 @@ services:
       - WORDPRESS_DB_USER=wordpress
       - WORDPRESS_DB_PASSWORD=wordpress
       - WORDPRESS_DB_NAME=wordpress
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 500M
 volumes:
   db_data:
   wordpress-files:

@@ -22,11 +22,6 @@ services:
       - CUSTOM_USER=yourUsername
       - PASSWORD=yourPassword
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 1g
 volumes:
 # The volume you want to read
   data:

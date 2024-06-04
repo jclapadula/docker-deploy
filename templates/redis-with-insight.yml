@@ -13,11 +13,6 @@ services:
     environment:
       # Change the password here if you are exposing redis! (default user is "default")
       REDIS_ARGS: "--requirepass YourPasswordHere"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 1g
 volumes:
   redis-data:
     driver: local

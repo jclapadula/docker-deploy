@@ -10,14 +10,8 @@ services:
     expose:
       # Only accesible in the deployment (hostname is postgres)
       - 5432
-    restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
 
   pgadmin:
     container_name: pgadmin
@@ -28,12 +22,6 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=YourPGAdminPassword
     ports:
       - "80:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 500m
 
 volumes:
   pgdata:
