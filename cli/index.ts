@@ -6,7 +6,7 @@ import { buildAndPublish, deploy } from "./src/deployments.js";
 
 const argv = yargs(hideBin(process.argv));
 
-argv
+void argv
   .usage("Usage: dd-cli <command> [options]")
   .command(
     "login",
@@ -38,6 +38,7 @@ argv
     () => deploy()
   )
   .scriptName("dd-cli")
+  .version("0.2.10")
   .showHelpOnFail(false)
   .command({
     command: "*",
