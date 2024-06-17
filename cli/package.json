@@ -1,6 +1,6 @@
 {
   "name": "dockerdeploy-cli",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "Docker Deploy CLI",
   "repository": "github:jclapadula/docker-deploy",
   "scripts": {

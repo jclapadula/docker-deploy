@@ -3,6 +3,7 @@ import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import { login, logout } from "./src/auth.js";
 import { buildAndPublish, deploy } from "./src/deployments.js";
+import { Architectures } from "./src/api.types.js";
 
 const argv = yargs(hideBin(process.argv));
 
@@ -14,7 +15,7 @@ void argv
     login
   )
   .command("logout", "Log out from Docker Deploy", logout)
-  .command<{ f: string; v: string[] }>(
+  .command<{ f: string; v: string[]; arch: Architectures | undefined }>(
     "build",
     "Builds and publish the docker image defined by the selected Dockerfile.",
     (args) =>
@@ -29,16 +30,23 @@ void argv
           default: ["latest"],
           description:
             "Set the version for this image tag. By default 'latest' is set",
-        }),
-    (args) => buildAndPublish({ dockerfile: args.f, versions: args.v })
+        })
+        .option("arch", {
+          type: "string",
+          choices: [undefined, Architectures.arm, Architectures.AMD64],
+        })
+        .version(false),
+    (args) =>
+      buildAndPublish({ dockerfile: args.f, versions: args.v, arch: args.arch })
   )
   .command<{ f: string }>(
     "deploy",
     "Deploys the current app into Docker Deploy. It requires the publish command to be executed first.",
+    (args) => args.version(false),
     () => deploy()
   )
   .scriptName("dd-cli")
-  .version("0.2.10")
+  .version("0.2.11")
   .showHelpOnFail(false)
   .command({
     command: "*",

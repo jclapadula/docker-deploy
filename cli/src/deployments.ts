@@ -11,14 +11,19 @@ import {
   getRegistryCredentials,
 } from "./api.js";
 import { getDeploymentConfig, updateDeploymentConfig } from "./config.js";
-import { DeploymentSize } from "./api.types.js";
+import { Architectures, DeploymentSize } from "./api.types.js";
 
 type DeployArgs = {
   dockerfile: string;
   versions: string[];
+  arch?: Architectures;
 };
 
-export const buildAndPublish = async ({ dockerfile, versions }: DeployArgs) => {
+export const buildAndPublish = async ({
+  dockerfile,
+  versions,
+  arch,
+}: DeployArgs) => {
   if (!fs.existsSync(dockerfile)) {
     console.error(
       "Dockerfile doesn't exist! Please run the command where your dockerfile is located"
@@ -29,7 +34,7 @@ export const buildAndPublish = async ({ dockerfile, versions }: DeployArgs) => {
 
   await checkIfDockerIsRunning();
 
-  await installEmulatorIfNecessary();
+  await installEmulatorIfNecessary(arch);
 
   await setAppNameIfNecessary();
 
@@ -37,7 +42,7 @@ export const buildAndPublish = async ({ dockerfile, versions }: DeployArgs) => {
 
   await loginIntoDockerRegistry(registryCredentials);
 
-  await buildAndPublishImage(dockerfile, registryCredentials, versions);
+  await buildAndPublishImage(dockerfile, registryCredentials, versions, arch);
 };
 
 export const deploy = async () => {
@@ -117,7 +122,8 @@ const getImagetag = (username: string, appName: string) =>
 const buildAndPublishImage = async (
   dockerfile: string,
   registryCredentials: RegistryCredentails,
-  versions: string[]
+  versions: string[],
+  arch?: Architectures
 ) => {
   if (versions.length === 0) {
     throw new Error(
@@ -134,9 +140,14 @@ const buildAndPublishImage = async (
 
   const tagsArg = tagsWithVersions.map((fullTag) => `-t ${fullTag} `).join("");
 
-  const buildCommand = `docker build -f ${dockerfile} ${
-    !isArmPc() ? "--platform linux/arm64" : ""
-  } . ${tagsArg}`;
+  const archOption =
+    arch == Architectures.arm
+      ? "--platform linux/arm64"
+      : arch == Architectures.AMD64
+      ? "--platform linux/amd64"
+      : "";
+
+  const buildCommand = `docker build -f ${dockerfile} ${archOption} . ${tagsArg}`;
 
   console.log("Building your docker image...");
   try {
@@ -201,34 +212,39 @@ const loginIntoDockerRegistry = async (credentials: RegistryCredentails) => {
 
 const isArmPc = () => process.arch.startsWith("arm");
 
-const installEmulatorIfNecessary = async () => {
-  if (isArmPc()) {
+const installEmulatorIfNecessary = async (architecture: Architectures) => {
+  if (!architecture) {
     return;
   }
 
-  const result = await inquirer.prompt({
-    type: "confirm",
-    name: "install_qemu",
-    message:
-      "Your CPU is not ARM, you need to configure a QEMU emulator to build ARM images.\n Do you want to configure it now?",
-  });
+  if (architecture == Architectures.arm && isArmPc()) {
+    return;
+  }
 
-  if (result.install_qemu) {
-    console.log("Configuring emulator...");
-    console.log("");
+  if (architecture == Architectures.AMD64 && !isArmPc()) {
+    return;
+  }
 
-    try {
-      const { stderr, stdout } = await exec(
-        "docker run --privileged --rm tonistiigi/binfmt --install arm64"
-      );
+  console.log(
+    `Your CPU is not ${architecture}. The emulator will be configured.`
+  );
 
-      if (stderr) {
-        console.log(stderr);
-      } else if (stdout) {
-        console.log(stdout);
-      }
-    } catch (error) {
-      console.error("Erorr ocurred when installing emulator");
+  const emulatorArchName = Architectures.arm ? "arm64" : "amd64";
+
+  console.log("Configuring emulator...");
+  console.log("");
+
+  try {
+    const { stderr, stdout } = await exec(
+      `docker run --privileged --rm tonistiigi/binfmt --install ${emulatorArchName}`
+    );
+
+    if (stderr) {
+      console.log(stderr);
+    } else if (stdout) {
+      console.log(stdout);
     }
+  } catch (error) {
+    console.error("Erorr ocurred when configuring the emulator");
   }
 };

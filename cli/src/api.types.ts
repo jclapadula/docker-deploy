@@ -12,3 +12,8 @@ export enum DeploymentSize {
   M = 2,
   L = 4,
 }
+
+export enum Architectures {
+  arm = "arm",
+  AMD64 = "AMD64",
+}
