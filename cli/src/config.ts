@@ -1,10 +1,12 @@
 import fs from "node:fs";
+import { Architectures } from "./api.types.js";
 
 export type DeploymentConfig = {
   imageName: string;
 
   /** Base without version */
   tagBase: string;
+  arch?: Architectures;
 };
 
 const configLocation = "./dockerdeploy.json";

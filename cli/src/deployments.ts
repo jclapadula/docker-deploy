@@ -8,12 +8,13 @@ import {
   RegistryCredentails,
   createDeployment,
   deployDeployment,
+  getDeployment,
   getRegistryCredentials,
 } from "./api.js";
 import { getDeploymentConfig, updateDeploymentConfig } from "./config.js";
 import { Architectures, DeploymentSize } from "./api.types.js";
 
-type DeployArgs = {
+type BuildArgs = {
   dockerfile: string;
   versions: string[];
   arch?: Architectures;
@@ -23,7 +24,7 @@ export const buildAndPublish = async ({
   dockerfile,
   versions,
   arch,
-}: DeployArgs) => {
+}: BuildArgs) => {
   if (!fs.existsSync(dockerfile)) {
     console.error(
       "Dockerfile doesn't exist! Please run the command where your dockerfile is located"
@@ -46,7 +47,11 @@ export const buildAndPublish = async ({
 };
 
 export const deploy = async () => {
-  const { tagBase, imageName } = getDeploymentConfig();
+  const config = getDeploymentConfig();
+  const { tagBase, imageName } = config;
+  let { arch } = config;
+  arch = arch || isArmPc() ? Architectures.arm : Architectures.AMD64;
+
   if (!tagBase) {
     console.error(
       `Not image tag found for ${
@@ -61,8 +66,9 @@ export const deploy = async () => {
     domain: "",
     size: DeploymentSize.XS,
     dockerfile: getComposeForSingleService({ imageTag: tagBase }),
+    arch,
   };
-  const deployment = await createDeployment(createDeploymentModel);
+  let deployment = await createDeployment(createDeploymentModel);
 
   console.log("");
   console.log("Deployment created successfully ✔");
@@ -74,6 +80,8 @@ export const deploy = async () => {
     "Edit your deployment here: " +
       `https://dockerdeploy.cloud/dashboard/deployments/${deployment.id}`
   );
+
+  deployment = await getDeployment(deployment.id);
   console.log(`See your deployment running: ${deployment.domain}`);
 };
 
@@ -84,12 +92,7 @@ const getComposeForSingleService = ({ imageTag }: { imageTag: string }) => {
     ports:
       # If your image is exposing a different port, change it in the right side. E.g.: "80:3000"
       - "80:80"
-    pull_policy: always
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 1g`;
+    pull_policy: always`;
 };
 
 const imageTagRegex = /^([a-z0-9]+(?:[._-]{1,2}[a-z0-9]+)*)$/;
@@ -181,7 +184,7 @@ const buildAndPublishImage = async (
     throw new Error(`An error ocurred when pushing your image\n${error}`);
   }
 
-  updateDeploymentConfig({ tagBase: imageTagBase });
+  updateDeploymentConfig({ tagBase: imageTagBase, arch });
 };
 
 const checkIfDockerIsRunning = async () => {

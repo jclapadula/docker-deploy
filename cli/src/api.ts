@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getAccessToken } from "./auth.js";
-import { DeploymentModel, DeploymentSize } from "./api.types.js";
+import { Architectures, DeploymentModel, DeploymentSize } from "./api.types.js";
 
 export type RegistryCredentails = {
   username: string;
@@ -31,6 +31,7 @@ export type CreateDeploymentModel = {
   /** Empty so it's generated */
   domain: "";
   size: DeploymentSize;
+  arch: Architectures;
 };
 
 export const createDeployment = async (
@@ -46,6 +47,27 @@ export const createDeployment = async (
         headers: {
           Authorization: "Bearer " + jwt,
           "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log("Something went wrong");
+  }
+};
+
+export const getDeployment = async (
+  deploymentId: string
+): Promise<DeploymentModel> => {
+  const jwt = await getAccessToken();
+
+  try {
+    const response = await axios.get<DeploymentModel>(
+      "https://api.dockerdeploy.cloud/api/deployments/" + deploymentId,
+      {
+        headers: {
+          Authorization: "Bearer " + jwt,
         },
       }
     );
