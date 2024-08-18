@@ -10,6 +10,9 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
+      # This will be the credentials for basic auth
+      - CUSTOM_USER=yourUsername
+      - PASSWORD=yourPassword
     volumes:
     # You need to map the volume where the data is located to read it
       - data:/data
@@ -17,10 +20,6 @@ services:
     # The sqlite will be available on port 8081 with https
       - 80:3000
     # - 80:3001
-    environment:
-    # This will be the credentials for basic auth
-      - CUSTOM_USER=yourUsername
-      - PASSWORD=yourPassword
     restart: unless-stopped
 volumes:
 # The volume you want to read
