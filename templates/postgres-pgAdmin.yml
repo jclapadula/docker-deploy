@@ -20,6 +20,7 @@ services:
       # Change credentials
       - PGADMIN_DEFAULT_EMAIL=youremail@domain.com
       - PGADMIN_DEFAULT_PASSWORD=YourPGAdminPassword
+      - PGADMIN_DISABLE_POSTFIX=true
     ports:
       - "80:80"
 
